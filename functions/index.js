@@ -17,10 +17,8 @@ function getCalendars(auth) {
       auth: auth,
     }, (error, res) => {
       if (error) {
-        console.log(error);
         reject(error);
       }
-      console.log("Request successful", res);
       resolve(res.data);
     });
   });
@@ -40,12 +38,10 @@ exports.listCalendars = functions.https.onRequest((req, res) => {
 
     getCalendars(oAuth2Client)
         .then((data) => {
-          console.log(data);
           res.status(200).send(data);
           return;
         })
         .catch((err) => {
-          console.error("Error adding event: " + err.message);
           res.status(500).send(ERROR_RESPONSE);
           return;
         });
