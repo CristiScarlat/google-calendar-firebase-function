@@ -19,11 +19,12 @@ function getCalendars(auth) {
   });
 }
 
-function getEvents(auth, calendarId, timeMin, timeMax) {
+function getEvents(auth, calendarId, props) {
   return new Promise(function(resolve, reject) {
     calendar.events.list({
       auth,
       calendarId,
+      ...props,
     }, (error, res) => {
       if (error) {
         console.log(error);
@@ -40,7 +41,7 @@ exports.listCalendars = functions.https.onRequest((req, res) => {
       const oAuth2Client = new OAuth2(
           credentials.web.client_id,
           credentials.web.client_secret,
-          credentials.web.redirect_uris[0]
+          credentials.web.redirect_uris[0],
       );
 
       oAuth2Client.setCredentials({
@@ -61,7 +62,11 @@ exports.listCalendars = functions.https.onRequest((req, res) => {
               return;
             });
       } else if (req.query.q === "listEvents") {
-        getEvents(oAuth2Client, req.query.calendarId)
+        const props = {
+          timeMin: req.query.timeMin,
+          timeMax: req.query.timeMax,
+        };
+        getEvents(oAuth2Client, req.query.calendarId, props)
             .then((data) => {
               res.status(200).send(data);
               return;
@@ -73,7 +78,10 @@ exports.listCalendars = functions.https.onRequest((req, res) => {
               });
               return;
             });
-      } else {
+      } else if(req.query.q === "addEvent"){
+        
+      }
+      else {
         res.status(500).send({
           status: "500",
           message: "Missing q parameter.",
