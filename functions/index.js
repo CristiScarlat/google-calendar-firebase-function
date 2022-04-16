@@ -35,7 +35,23 @@ function getEvents(auth, calendarId, props) {
   });
 }
 
-exports.listCalendars = functions.https.onRequest((req, res) => {
+function addEvent(auth, calendarId, resource) {
+  return new Promise(function(resolve, reject) {
+    calendar.events.insert({
+      auth,
+      calendarId,
+      resource,
+    }, (error, res) => {
+      if (error) {
+        console.log(error);
+        reject(error);
+      }
+      resolve(res.data);
+    });
+  });
+}
+
+exports.gCalendarService = functions.https.onRequest((req, res) => {
   cors()(req, res, () => {
     if (req.query.appKey && req.query.appKey === credentials.app_key) {
       const oAuth2Client = new OAuth2(
@@ -78,10 +94,23 @@ exports.listCalendars = functions.https.onRequest((req, res) => {
               });
               return;
             });
-      } else if(req.query.q === "addEvent"){
-        
-      }
-      else {
+      } else if (req.query.q === "addEvent" && req.method === "POST") {
+        const resource = req.body;
+        addEvent(oAuth2Client, req.query.calendarId, resource)
+            .then((data) => {
+              // res.set("Access-Control-Allow-Origin", "*");
+              res.status(201).send(data);
+              return;
+            })
+            .catch((err) => {
+              // res.set("Access-Control-Allow-Origin", "*");
+              res.status(500).send({
+                status: "500",
+                message: "There was an error retrieving data from Google calendar",
+              });
+              return;
+            });
+      } else {
         res.status(500).send({
           status: "500",
           message: "Missing q parameter.",
