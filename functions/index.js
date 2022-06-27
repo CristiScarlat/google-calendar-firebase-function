@@ -4,7 +4,7 @@ const calendar = google.calendar("v3");
 const functions = require("firebase-functions");
 const cors = require("cors");
 
-const credentials = require("./credentials.json");
+const credentials = require("./google-credentials-dermatique.json");
 
 function getCalendars(auth) {
   return new Promise(function(resolve, reject) {
@@ -74,6 +74,7 @@ exports.gCalendarService = functions.https.onRequest((req, res) => {
               res.status(500).send({
                 status: "500",
                 message: "There was an error retrieving data from Google calendar",
+                error: JSON.stringify(err),
               });
               return;
             });
@@ -91,6 +92,7 @@ exports.gCalendarService = functions.https.onRequest((req, res) => {
               res.status(500).send({
                 status: "500",
                 message: "There was an error retrieving data from Google calendar",
+                error: JSON.stringify(err),
               });
               return;
             });
